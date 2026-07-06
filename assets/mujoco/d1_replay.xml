@@ -91,12 +91,12 @@
   </worldbody>
 
   <actuator>
-    <position name="a_j0" joint="j0" kp="120" kv="10"/>
-    <position name="a_j1" joint="j1" kp="120" kv="10"/>
-    <position name="a_j2" joint="j2" kp="120" kv="10"/>
-    <position name="a_j3" joint="j3" kp="120" kv="10"/>
-    <position name="a_j4" joint="j4" kp="120" kv="10"/>
-    <position name="a_j5" joint="j5" kp="120" kv="10"/>
-    <position name="a_j6" joint="j6" kp="200" kv="15"/>
+    <position name="a_j0" joint="j0" kp="180" kv="12"/>
+    <position name="a_j1" joint="j1" kp="180" kv="12"/>
+    <position name="a_j2" joint="j2" kp="180" kv="12"/>
+    <position name="a_j3" joint="j3" kp="180" kv="12"/>
+    <position name="a_j4" joint="j4" kp="180" kv="12"/>
+    <position name="a_j5" joint="j5" kp="180" kv="12"/>
+    <position name="a_j6" joint="j6" kp="150" kv="12"/>
   </actuator>
 </mujoco>

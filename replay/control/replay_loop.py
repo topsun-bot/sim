@@ -43,7 +43,7 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
     timeline = [(t - t0, angles) for t, angles in timeline]
 
     backend = create_backend(config.backend, enable_render=config.write_video)
-    backend.reset(scene)
+    backend.reset(scene, initial_angles_deg=timeline[0][1])
 
     dt = 1.0 / config.control_hz
     tracker = TrackingAccumulator()
@@ -54,6 +54,7 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
     cmd_idx = 0
     current_target = timeline[0][1]
     t = 0.0
+    last_obs = None
 
     while t <= t_end + dt * 0.5:
         while cmd_idx + 1 < len(timeline) and timeline[cmd_idx + 1][0] <= t:
@@ -61,6 +62,7 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
             current_target = timeline[cmd_idx][1]
 
         obs = backend.step(current_target, dt)
+        last_obs = obs
         tracker.add(t, current_target, obs.joint_pos_deg)
 
         if config.write_video and int(t * config.control_hz) % 2 == 0:
@@ -72,7 +74,8 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
     orange_pos = backend.get_object_pose("orange")
     bowl_pos = backend.get_object_pose("bowl")
     in_bowl = check_orange_in_bowl(orange_pos, bowl_pos, scene.bowl_radius_m)
-    sim_success = check_task_success(in_bowl, gripper_open=True)
+    gripper_open = not last_obs.gripper_closed if last_obs is not None else True
+    sim_success = check_task_success(in_bowl, gripper_open=gripper_open)
 
     meta_success = meta.result.lower() == "success"
     report = ReplayReport(

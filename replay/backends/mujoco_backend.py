@@ -86,7 +86,7 @@ class MuJoCoBackend:
 
             warnings.warn(f"MuJoCo renderer disabled: {last_err}")
 
-    def reset(self, scene: SceneSpec) -> None:
+    def reset(self, scene: SceneSpec, initial_angles_deg: np.ndarray | None = None) -> None:
         mujoco = self._mujoco
         mujoco.mj_resetData(self.model, self.data)
 
@@ -96,8 +96,24 @@ class MuJoCoBackend:
         self._grasp_attached = False
         self._grasp_offset = np.zeros(3)
 
+        if initial_angles_deg is not None:
+            self.set_joint_positions(initial_angles_deg)
+
         for _ in range(50):
             mujoco.mj_step(self.model, self.data)
+
+    def set_joint_positions(self, angles_deg: np.ndarray) -> None:
+        mujoco = self._mujoco
+        ctrl = self._angles_to_ctrl(angles_deg)
+        for i, name in enumerate(JOINT_NAMES):
+            adr = self.model.joint(name).qposadr[0]
+            if i < 6:
+                self.data.qpos[adr] = float(angles_deg[i])
+            else:
+                self.data.qpos[adr] = float(ctrl[i])
+        self.data.ctrl[:] = ctrl
+        self.data.qvel[:] = 0
+        mujoco.mj_forward(self.model, self.data)
 
     def _set_body_pos(self, name: str, pos: np.ndarray) -> None:
         bid = self._mujoco.mj_name2id(self.model, self._mujoco.mjtObj.mjOBJ_BODY, name)
@@ -127,7 +143,8 @@ class MuJoCoBackend:
 
         orange_pos = self.get_object_pose("orange")
         bowl_pos = self.get_object_pose("bowl")
-        gripper_closed = float(target_angles_deg[6]) < 10.0
+        gripper_deg = map_d1_gripper_deg(float(target_angles_deg[6]))
+        gripper_closed = gripper_deg > -5.0
 
         return SimObservation(
             joint_pos_deg=joint_pos,

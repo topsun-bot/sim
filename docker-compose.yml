@@ -3,12 +3,15 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.mujoco
-    image: sim-replay:mujoco
+    image: ${IMAGE_MUJOCO:-sim-replay:mujoco}
+    env_file:
+      - docker/.env
     volumes:
-      - ./data:/data:ro
-      - ./output:/output
+      - ${REPLAY_DATA_DIR:-./data}:/data:ro
+      - ${REPLAY_OUTPUT_DIR:-./output}:/output
     environment:
-      MUJOCO_GL: egl
+      MUJOCO_GL: ${MUJOCO_GL:-egl}
+      REPLAY_BACKEND: mujoco
     command: >
       run
       --mcap /data/eda9cc2192f7.mcap
@@ -21,10 +24,23 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.isaac
-    image: sim-replay:isaac
+      args:
+        ISAAC_BASE_IMAGE: ${ISAAC_SIM_IMAGE:-python:3.11-slim}
+    image: ${IMAGE_ISAAC:-sim-replay:isaac}
+    runtime: nvidia
+    user: "0:0"
+    env_file:
+      - docker/.env
     volumes:
-      - ./data:/data:ro
-      - ./output:/output
+      - ${REPLAY_DATA_DIR:-./data}:/data:ro
+      - ${REPLAY_OUTPUT_DIR:-./output}:/output
+      # ISAAC_SIM_PATH 由 setup.sh 写入 docker-compose.override.yml 挂载
+    environment:
+      REPLAY_BACKEND: isaac
+      NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
+      NVIDIA_DRIVER_CAPABILITIES: ${NVIDIA_DRIVER_CAPABILITIES:-compute,utility,graphics}
+      ACCEPT_EULA: ${ACCEPT_EULA:-Y}
+      PRIVACY_CONSENT: ${PRIVACY_CONSENT:-Y}
     deploy:
       resources:
         reservations:
@@ -37,4 +53,5 @@ services:
       --mcap /data/eda9cc2192f7.mcap
       --meta /data/eda9cc2192f7.meta.json
       --backend isaac
-      --output /output/eda9cc2192f7
+      --output /output
+      --no-video
