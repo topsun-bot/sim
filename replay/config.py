@@ -16,6 +16,8 @@ class ReplayConfig:
     output_dir: Path = Path("output")
     latency_compensation_ms: float = 0.0
     write_video: bool = True
+    visualize: bool = False
+    realtime: bool = True
     control_hz: float = 30.0
 
     @property

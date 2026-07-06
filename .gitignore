@@ -12,6 +12,5 @@ docker/.env
 docker/config/
 docker/images/
 docker-compose.override.yml
-doc/
 *.tar
 *.log

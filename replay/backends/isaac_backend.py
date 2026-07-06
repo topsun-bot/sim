@@ -6,9 +6,10 @@ from replay.backends.mujoco_backend import MuJoCoBackend
 class IsaacSimBackend:
     """Isaac Sim backend — Omniverse runtime + MuJoCo physics delegate (Phase 3)."""
 
-    def __init__(self, enable_render: bool = True) -> None:
+    def __init__(self, enable_render: bool = True, enable_viewer: bool = False) -> None:
         self._available = False
         self._enable_render = enable_render
+        self._enable_viewer = enable_viewer
         self._inner: MuJoCoBackend | None = None
         try:
             import omni  # noqa: F401
@@ -23,9 +24,22 @@ class IsaacSimBackend:
                 "Isaac Sim (omni) is not installed. "
                 "Use --backend mujoco or run with docker compose --profile isaac on a GPU host."
             )
-        # Isaac 容器内 MuJoCo EGL 渲染与 Omniverse 冲突，物理步进用无渲染模式
-        self._inner = MuJoCoBackend(headless=True, enable_render=False)
+        need_render = self._enable_render or self._enable_viewer
+        self._inner = MuJoCoBackend(
+            headless=not self._enable_viewer,
+            enable_render=need_render,
+            enable_viewer=self._enable_viewer,
+        )
         self._inner.reset(scene, initial_angles_deg=initial_angles_deg)
+
+    def open_viewer(self) -> None:
+        if self._inner is not None:
+            self._inner.open_viewer()
+
+    def sync_viewer(self) -> bool:
+        if self._inner is None:
+            return True
+        return self._inner.sync_viewer()
 
     def set_joint_positions(self, angles_deg) -> None:
         if self._inner is None:
@@ -53,9 +67,17 @@ class IsaacSimBackend:
             self._inner = None
 
 
-def create_backend(name: str, enable_render: bool = True) -> MuJoCoBackend | IsaacSimBackend:
+def create_backend(
+    name: str,
+    enable_render: bool = True,
+    enable_viewer: bool = False,
+) -> MuJoCoBackend | IsaacSimBackend:
     if name == "mujoco":
-        return MuJoCoBackend(headless=True, enable_render=enable_render)
+        return MuJoCoBackend(
+            headless=not enable_viewer,
+            enable_render=enable_render,
+            enable_viewer=enable_viewer,
+        )
     if name == "isaac":
-        return IsaacSimBackend(enable_render=enable_render)
+        return IsaacSimBackend(enable_render=enable_render, enable_viewer=enable_viewer)
     raise ValueError(f"Unknown backend: {name}")

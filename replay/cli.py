@@ -60,6 +60,8 @@ def run(
         0.0, "--latency-compensation-ms", help="Shift control earlier by N ms"
     ),
     no_video: bool = typer.Option(False, "--no-video", help="Skip video export"),
+    visualize: bool = typer.Option(False, "--visualize", "-v", help="Live 3D viewer + camera window"),
+    realtime: bool = typer.Option(True, "--realtime/--fast", help="Wall-clock sync when visualizing"),
 ) -> None:
     """Run physics closed-loop replay."""
     if mcap is None:
@@ -79,6 +81,8 @@ def run(
         output_dir=output,
         latency_compensation_ms=latency_compensation_ms,
         write_video=not no_video,
+        visualize=visualize,
+        realtime=realtime,
     )
 
     result = run_replay(config)

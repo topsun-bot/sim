@@ -39,18 +39,27 @@ def j6_slide_to_deg(slide_m: float) -> float:
 
 
 class MuJoCoBackend:
-    def __init__(self, headless: bool = True, enable_render: bool = True) -> None:
+    def __init__(
+        self,
+        headless: bool = True,
+        enable_render: bool = True,
+        enable_viewer: bool = False,
+    ) -> None:
         import mujoco
 
+        self._enable_viewer = enable_viewer
+        if enable_viewer:
+            headless = False
         if headless and "MUJOCO_GL" not in os.environ:
             os.environ.setdefault("MUJOCO_GL", "egl")
 
         self._mujoco = mujoco
-        self._enable_render = enable_render
+        self._enable_render = enable_render or enable_viewer
         self.model = mujoco.MjModel.from_xml_path(str(MJCF_PATH))
         self.data = mujoco.MjData(self.model)
         self.renderer = None
-        if enable_render:
+        self._viewer = None
+        if self._enable_render:
             self._init_renderer()
         self._scene = SceneSpec(scene_id="H2-grasp", object_class="orange")
         self._actuator_ids = [
@@ -70,7 +79,7 @@ class MuJoCoBackend:
     def _init_renderer(self) -> None:
         import mujoco
 
-        backends = [os.environ.get("MUJOCO_GL", "egl"), "osmesa"]
+        backends = ["egl", "osmesa"] if self._enable_viewer else [os.environ.get("MUJOCO_GL", "egl"), "osmesa"]
         last_err: Exception | None = None
         for backend in backends:
             try:
@@ -85,6 +94,36 @@ class MuJoCoBackend:
             import warnings
 
             warnings.warn(f"MuJoCo renderer disabled: {last_err}")
+
+    def open_viewer(self) -> None:
+        if not self._enable_viewer or self._viewer is not None:
+            return
+        if not os.environ.get("DISPLAY"):
+            import warnings
+
+            warnings.warn("DISPLAY 未设置，跳过 MuJoCo 3D 视窗")
+            return
+        import warnings
+
+        import mujoco.viewer
+
+        try:
+            self._viewer = mujoco.viewer.launch_passive(self.model, self.data)
+        except Exception as exc:
+            warnings.warn(f"MuJoCo 3D viewer unavailable: {exc}")
+            return
+        self._viewer.cam.distance = 1.4
+        self._viewer.cam.azimuth = 140
+        self._viewer.cam.elevation = -22
+        self._viewer.cam.lookat[:] = [0.32, 0.1, 0.82]
+
+    def sync_viewer(self) -> bool:
+        if self._viewer is None:
+            return True
+        if not self._viewer.is_running():
+            return False
+        self._viewer.sync()
+        return True
 
     def reset(self, scene: SceneSpec, initial_angles_deg: np.ndarray | None = None) -> None:
         mujoco = self._mujoco
@@ -188,6 +227,9 @@ class MuJoCoBackend:
         return self.data.xpos[bid].copy()
 
     def close(self) -> None:
+        if self._viewer is not None:
+            self._viewer.close()
+            self._viewer = None
         if self.renderer is not None:
             del self.renderer
             self.renderer = None

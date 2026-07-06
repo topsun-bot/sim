@@ -16,6 +16,8 @@ from replay.mcap.sync import TimestampedSequence, build_control_timeline
 from replay.metrics.report import write_compare_video, write_sim_videos
 from replay.metrics.success import check_orange_in_bowl, check_task_success
 from replay.metrics.tracking import TrackingAccumulator
+from replay.viz.display import ReplayDisplay
+import warnings
 
 
 @dataclass
@@ -42,8 +44,22 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
     t0 = timeline[0][0]
     timeline = [(t - t0, angles) for t, angles in timeline]
 
-    backend = create_backend(config.backend, enable_render=config.write_video)
+    need_render = config.write_video or config.visualize
+    backend = create_backend(
+        config.backend,
+        enable_render=need_render,
+        enable_viewer=config.visualize,
+    )
     backend.reset(scene, initial_angles_deg=timeline[0][1])
+
+    display: ReplayDisplay | None = None
+    if config.visualize:
+        display = ReplayDisplay(realtime=config.realtime)
+        display.open(backend)
+        if not display.enabled:
+            warnings.warn("可视化不可用（无 DISPLAY），继续无界面回放")
+            display.close()
+            display = None
 
     dt = 1.0 / config.control_hz
     tracker = TrackingAccumulator()
@@ -68,6 +84,9 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
         if config.write_video and int(t * config.control_hz) % 2 == 0:
             scene_frames.append(backend.render("scene"))
             wrist_frames.append(backend.render("wrist"))
+
+        if display is not None and not display.update(backend, t, dt):
+            break
 
         t += dt
 
@@ -115,6 +134,9 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
             fps=config.control_hz / 2,
             t0=recording.commands[0].timestamp_sec if recording.commands else 0.0,
         )
+
+    if display is not None:
+        display.close()
 
     backend.close()
 

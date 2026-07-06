@@ -19,6 +19,32 @@ services:
       --backend mujoco
       --output /output
 
+  replay-viz:
+    profiles: [viz]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mujoco
+    image: ${IMAGE_MUJOCO:-sim-replay:mujoco}
+    network_mode: host
+    env_file:
+      - docker/.env
+    volumes:
+      - ${REPLAY_DATA_DIR:-./data}:/data:ro
+      - ${REPLAY_OUTPUT_DIR:-./output}:/output
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      DISPLAY: ${DISPLAY:-:0}
+      MUJOCO_GL: egl
+      REPLAY_BACKEND: mujoco
+    command: >
+      run
+      --mcap /data/eda9cc2192f7.mcap
+      --meta /data/eda9cc2192f7.meta.json
+      --backend mujoco
+      --output /output
+      --visualize
+      --no-video
+
   replay-isaac:
     profiles: [isaac]
     build:
