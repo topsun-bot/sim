@@ -1,0 +1,29 @@
+FROM python:3.11-slim
+
+LABEL description="D1 MCAP physics replay (MuJoCo)"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglib2.0-0 \
+    libegl1 \
+    libosmesa6 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY pyproject.toml README.md /app/
+COPY replay /app/replay
+COPY assets /app/assets
+
+RUN pip install --no-cache-dir -e .
+
+ENV MUJOCO_GL=egl
+ENV PYTHONUNBUFFERED=1
+
+RUN python -c "import mujoco, mcap, cv2; from replay.backends.mujoco_backend import MuJoCoBackend; print('OK')"
+
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["run", "--mcap", "/data/eda9cc2192f7.mcap", "--meta", "/data/eda9cc2192f7.meta.json", "--output", "/output"]

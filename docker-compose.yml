@@ -1,0 +1,40 @@
+services:
+  replay:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mujoco
+    image: sim-replay:mujoco
+    volumes:
+      - ./data:/data:ro
+      - ./output:/output
+    environment:
+      MUJOCO_GL: egl
+    command: >
+      run
+      --mcap /data/eda9cc2192f7.mcap
+      --meta /data/eda9cc2192f7.meta.json
+      --backend mujoco
+      --output /output
+
+  replay-isaac:
+    profiles: [isaac]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.isaac
+    image: sim-replay:isaac
+    volumes:
+      - ./data:/data:ro
+      - ./output:/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: >
+      run
+      --mcap /data/eda9cc2192f7.mcap
+      --meta /data/eda9cc2192f7.meta.json
+      --backend isaac
+      --output /output/eda9cc2192f7

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco model="d1_replay_h2_grasp">
+  <compiler angle="degree" coordinate="local"/>
+  <option gravity="0 0 -9.81" timestep="0.002" integrator="implicitfast"/>
+
+  <default>
+    <geom friction="1.0 0.1 0.01" solref="0.02 1" solimp="0.9 0.95 0.001"/>
+    <joint damping="2"/>
+  </default>
+
+  <visual>
+    <global offwidth="640" offheight="480"/>
+    <quality shadowsize="2048"/>
+  </visual>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512"
+             rgb1="0.25 0.25 0.25" rgb2="0.4 0.4 0.4"/>
+    <material name="grid" texture="grid" texrepeat="8 8"/>
+    <material name="link" rgba="0.75 0.78 0.82 1"/>
+    <material name="table" rgba="0.55 0.45 0.35 1"/>
+    <material name="orange" rgba="1.0 0.55 0.1 1"/>
+    <material name="bowl" rgba="0.9 0.9 0.95 1"/>
+    <material name="bowl_zone" rgba="0.3 0.75 0.35 0.35"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0.5 0 1.5" dir="-0.3 0 -1" diffuse="1 1 1"/>
+    <geom name="floor" type="plane" size="2 2 0.05" material="grid"/>
+
+    <!-- 桌面 -->
+    <geom name="table" type="box" pos="0.35 0.1 0.725" size="0.35 0.35 0.025" material="table"/>
+
+    <!-- 场景相机：meta 外参近似 -->
+    <body name="camera_mount" pos="0.665 0.315 0.895" euler="0 45 0">
+      <camera name="scene_cam" pos="0 0 0" fovy="58"/>
+    </body>
+
+    <!-- 碗（放置目标区） -->
+    <body name="bowl" pos="0.28 0.12 0.755">
+      <geom name="bowl_geom" type="cylinder" size="0.06 0.02" material="bowl"
+            contype="1" conaffinity="1" mass="0.2"/>
+      <geom name="bowl_zone" type="cylinder" size="0.055 0.005" pos="0 0 0.025"
+            material="bowl_zone" contype="0" conaffinity="0"/>
+      <site name="bowl_center" pos="0 0 0.02" size="0.01"/>
+    </body>
+
+    <!-- 橙子（可物理交互） -->
+    <body name="orange" pos="0.32 0.08 0.79">
+      <freejoint name="orange_free"/>
+      <geom name="orange_geom" type="sphere" size="0.035" material="orange"
+            mass="0.15" contype="1" conaffinity="1"/>
+      <site name="orange_center" pos="0 0 0" size="0.01"/>
+    </body>
+
+    <!-- D1 机械臂 -->
+    <body name="base" pos="0 0 0.055">
+      <geom type="cylinder" size="0.05 0.03" material="link"/>
+      <body name="link1" pos="0 0 0.04">
+        <joint name="j0" type="hinge" axis="0 0 1" range="-135 135"/>
+        <geom type="capsule" fromto="0 0 0 0 0 0.08" size="0.025" material="link"/>
+        <body name="link2" pos="0 0 0.08">
+          <joint name="j1" type="hinge" axis="0 1 0" range="-90 90"/>
+          <geom type="capsule" fromto="0 0 0 0 0 0.12" size="0.022" material="link"/>
+          <body name="link3" pos="0 0 0.12">
+            <joint name="j2" type="hinge" axis="0 1 0" range="-90 90"/>
+            <geom type="capsule" fromto="0 0 0 0 0 0.12" size="0.02" material="link"/>
+            <body name="link4" pos="0 0 0.12">
+              <joint name="j3" type="hinge" axis="0 1 0" range="-135 135"/>
+              <geom type="capsule" fromto="0 0 0 0 0 0.08" size="0.018" material="link"/>
+              <body name="link5" pos="0 0 0.08">
+                <joint name="j4" type="hinge" axis="0 1 0" range="-90 90"/>
+                <geom type="capsule" fromto="0 0 0 0 0 0.06" size="0.016" material="link"/>
+                <body name="link6" pos="0 0 0.06">
+                  <joint name="j5" type="hinge" axis="0 0 1" range="-135 135"/>
+                  <geom type="capsule" fromto="0 0 0 0 0 0.05" size="0.014" material="link"/>
+                  <body name="ee" pos="0 0 0.05">
+                    <joint name="j6" type="slide" axis="0 1 0" range="-0.03 0.02"/>
+                    <geom name="gripper_l" type="box" pos="0 0.015 0" size="0.008 0.015 0.025" material="link"/>
+                    <geom name="gripper_r" type="box" pos="0 -0.015 0" size="0.008 0.015 0.025" material="link"/>
+                    <site name="ee_tip" pos="0 0 0" size="0.005"/>
+                    <camera name="wrist_cam" pos="0.03 0 0" quat="0.707 0 0.707 0" fovy="60"/>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position name="a_j0" joint="j0" kp="120" kv="10"/>
+    <position name="a_j1" joint="j1" kp="120" kv="10"/>
+    <position name="a_j2" joint="j2" kp="120" kv="10"/>
+    <position name="a_j3" joint="j3" kp="120" kv="10"/>
+    <position name="a_j4" joint="j4" kp="120" kv="10"/>
+    <position name="a_j5" joint="j5" kp="120" kv="10"/>
+    <position name="a_j6" joint="j6" kp="200" kv="15"/>
+  </actuator>
+</mujoco>

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sim-replay"
+version = "0.1.0"
+description = "MCAP physics replay for D1 manipulator (MuJoCo / Isaac Sim)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcap>=1.0",
+    "numpy>=1.24",
+    "opencv-python-headless>=4.8",
+    "mujoco>=3.0",
+    "typer>=0.9",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+replay = "replay.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["replay*"]

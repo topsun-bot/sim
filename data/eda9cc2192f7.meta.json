@@ -1,0 +1,175 @@
+{
+  "episode_id": "eda9cc2192f7",
+  "created_at": "2026-06-30T09:39:21.636878+00:00",
+  "platform_profile": {
+    "morphology": "fixed_manipulator",
+    "hardware": "d1_leader_follower",
+    "action_space_version": "0.3.0",
+    "action_profile": "manip_only",
+    "collection_method": "teleop_leader_follower",
+    "primary_module": "manip",
+    "scene_id": "H2-grasp"
+  },
+  "object_class": "orange",
+  "object_pose_cluster": "cluster_01",
+  "lighting": "normal",
+  "language": {
+    "instruction": "pick_and_place_orange_to_bowl",
+    "variants": [
+      "pick_and_place_orange_to_bowl",
+      "Pick up the orange and place it in the bowl.",
+      "Grab the orange from the table and put it in the bowl."
+    ]
+  },
+  "result": "success",
+  "failure_mode": "none",
+  "notes": "",
+  "topics": [
+    "/d1/joint_states",
+    "/d1/command",
+    "/d1/follower_joint_states",
+    "/camera/scene/image_raw",
+    "/camera/wrist/image_raw"
+  ],
+  "cameras": [
+    {
+      "channel": "/camera/scene/image_raw",
+      "camera": "realsense_d435i",
+      "calibrated": true,
+      "serial": "346122070681",
+      "intrinsics_source": "realsense_factory_rgb_640x480",
+      "intrinsics": {
+        "width": 640,
+        "height": 480,
+        "fx": 606.744140625,
+        "fy": 606.3030395507812,
+        "cx": 326.3790588378906,
+        "cy": 247.2223358154297,
+        "distortion_model": "plumb_bob",
+        "distortion": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "type": "external",
+      "position": {
+        "x": 0.665,
+        "y": 0.315,
+        "z": 0.895
+      },
+      "orientation": {
+        "pitch": 45,
+        "yaw": 0,
+        "roll": 0
+      },
+      "reference_frame": "base_link",
+      "tolerance_cm": 5
+    },
+    {
+      "channel": "/camera/wrist/image_raw",
+      "camera": "usb_2m_mjpg",
+      "calibrated": false,
+      "intrinsics": {
+        "width": 640,
+        "height": 480,
+        "fx": 552.0,
+        "fy": 552.0,
+        "cx": 320.0,
+        "cy": 240.0,
+        "distortion_model": "plumb_bob",
+        "distortion": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "type": "wrist",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "orientation": {
+        "pitch": 0,
+        "yaw": 0,
+        "roll": 0
+      },
+      "reference_frame": "ee_link",
+      "tolerance_cm": 5
+    }
+  ],
+  "mcap_path": "data/raw/mcap/20260630/eda9cc2192f7/eda9cc2192f7.mcap",
+  "meta_path": "data/raw/mcap/20260630/eda9cc2192f7/eda9cc2192f7.meta.json",
+  "duration_sec": 11.033,
+  "frame_counts": {
+    "/d1/joint_states": 322,
+    "/d1/command": 106,
+    "/d1/follower_joint_states": 106,
+    "/camera/scene/image_raw": 305,
+    "/camera/wrist/image_raw": 289
+  },
+  "sync_report": {
+    "passed": true,
+    "threshold_ms": 100.0,
+    "topic_counts": {
+      "/d1/joint_states": 322,
+      "/d1/command": 106,
+      "/d1/follower_joint_states": 106,
+      "/camera/scene/image_raw": 305,
+      "/camera/wrist/image_raw": 289
+    },
+    "pairwise_median_delta_ms": {
+      "/d1/joint_states <-> /camera/scene/image_raw": 9.686,
+      "/d1/joint_states <-> /camera/wrist/image_raw": 9.15,
+      "/d1/joint_states <-> /d1/command": 26.445,
+      "/d1/joint_states <-> /d1/follower_joint_states": 24.386
+    },
+    "pairwise_max_delta_ms": {
+      "/d1/joint_states <-> /camera/scene/image_raw": 479.356,
+      "/d1/joint_states <-> /camera/wrist/image_raw": 1025.933,
+      "/d1/joint_states <-> /d1/command": 59.991,
+      "/d1/joint_states <-> /d1/follower_joint_states": 84.224
+    },
+    "anchor_topic": "/d1/joint_states",
+    "warnings": []
+  },
+  "latency_report": {
+    "mcap_path": "data/raw/mcap/20260630/eda9cc2192f7/eda9cc2192f7.mcap",
+    "joint_index": 0,
+    "joint": "j0",
+    "leader_samples": 322,
+    "follower_samples": 106,
+    "command_samples": 106,
+    "step_count": 0,
+    "step_latency_median_ms": null,
+    "step_latency_p90_ms": null,
+    "command_to_follower_median_ms": null,
+    "leader_to_command_median_ms": null,
+    "measurement_mode": "leader_to_follower",
+    "cross_corr_lag_ms": 100.0,
+    "cross_corr_strength": 0.8897,
+    "latency_metric": "cross_corr",
+    "primary_latency_ms": 100.0,
+    "threshold_ms": 400.0,
+    "passed": true,
+    "warnings": [
+      "No sharp joint steps on j0; using velocity cross-correlation lag (100 ms, strength 0.89)."
+    ],
+    "steps": []
+  },
+  "lerobot_export": {},
+  "video_export": {
+    "ok": true,
+    "videos": {
+      "scene": "data/raw/mcap/20260630/eda9cc2192f7/video/scene.mp4",
+      "wrist": "data/raw/mcap/20260630/eda9cc2192f7/video/wrist.mp4",
+      "combined": "data/raw/mcap/20260630/eda9cc2192f7/video/combined.mp4"
+    },
+    "video_dir": "data/raw/mcap/20260630/eda9cc2192f7/video"
+  }
+}

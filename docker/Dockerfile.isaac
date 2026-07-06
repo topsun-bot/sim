@@ -1,0 +1,21 @@
+# Isaac Sim backend image — requires NVIDIA GPU + Omniverse runtime on host.
+# This Dockerfile installs replay CLI; mount Isaac Sim SDK from host at runtime.
+FROM python:3.11-slim
+
+LABEL description="D1 MCAP replay — Isaac Sim profile (stub)"
+
+WORKDIR /app
+
+COPY pyproject.toml README.md /app/
+COPY replay /app/replay
+COPY assets /app/assets
+
+RUN pip install --no-cache-dir -e .
+
+ENV PYTHONUNBUFFERED=1
+
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["run", "--backend", "isaac", "--mcap", "/data/eda9cc2192f7.mcap", "--meta", "/data/eda9cc2192f7.meta.json", "--output", "/output/eda9cc2192f7"]
