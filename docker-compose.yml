@@ -45,6 +45,33 @@ services:
       --visualize
       --no-video
 
+  replay-foxglove:
+    profiles: [foxglove]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mujoco
+    image: ${IMAGE_MUJOCO:-sim-replay:mujoco}
+    env_file:
+      - docker/.env
+    ports:
+      - "${FOXGLOVE_PORT:-8765}:${FOXGLOVE_PORT:-8765}"
+    volumes:
+      - ${REPLAY_DATA_DIR:-./data}:/data:ro
+      - ${REPLAY_OUTPUT_DIR:-./output}:/output
+    environment:
+      MUJOCO_GL: ${MUJOCO_GL:-egl}
+      REPLAY_BACKEND: mujoco
+    command: >
+      run
+      --mcap /data/eda9cc2192f7.mcap
+      --meta /data/eda9cc2192f7.meta.json
+      --backend mujoco
+      --output /output
+      --foxglove
+      --foxglove-host 0.0.0.0
+      --foxglove-port 8765
+      --no-video
+
   replay-isaac:
     profiles: [isaac]
     build:

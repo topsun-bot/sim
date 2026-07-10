@@ -31,12 +31,19 @@ docker compose --env-file docker/.env --profile viz run --rm replay-viz
 ### 实时可视化
 
 ```bash
-replay run -v                          # 3D 视窗 + 双相机画面，按真实时间播放
-replay run -v --fast --no-video        # 全速回放，不导出视频
-# 窗口内按 Q 或 Esc 提前结束
+# MuJoCo 3D + OpenCV（需 DISPLAY）
+replay run -v
+
+# Foxglove Studio（推荐，无需 X11）
+replay run --foxglove
+# Studio → Open connection → ws://localhost:8765
 ```
 
-无 `DISPLAY` 时（如纯 Docker 无头环境）自动降级为无界面回放，不中断流程。
+Docker：
+
+```bash
+docker compose --env-file docker/.env --profile foxglove run --rm -p 8765:8765 replay-foxglove
+```
 
 ## 文档
 

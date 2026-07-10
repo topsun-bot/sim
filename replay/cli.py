@@ -60,7 +60,10 @@ def run(
         0.0, "--latency-compensation-ms", help="Shift control earlier by N ms"
     ),
     no_video: bool = typer.Option(False, "--no-video", help="Skip video export"),
-    visualize: bool = typer.Option(False, "--visualize", "-v", help="Live 3D viewer + camera window"),
+    visualize: bool = typer.Option(False, "--visualize", "-v", help="MuJoCo 3D viewer + OpenCV 相机窗口"),
+    foxglove: bool = typer.Option(False, "--foxglove", help="Foxglove WebSocket 实时可视化"),
+    foxglove_host: str = typer.Option("0.0.0.0", "--foxglove-host", help="Foxglove WS 监听地址"),
+    foxglove_port: int = typer.Option(8765, "--foxglove-port", help="Foxglove WS 端口"),
     realtime: bool = typer.Option(True, "--realtime/--fast", help="Wall-clock sync when visualizing"),
 ) -> None:
     """Run physics closed-loop replay."""
@@ -82,8 +85,15 @@ def run(
         latency_compensation_ms=latency_compensation_ms,
         write_video=not no_video,
         visualize=visualize,
+        foxglove=foxglove,
+        foxglove_host=foxglove_host,
+        foxglove_port=foxglove_port,
         realtime=realtime,
     )
+
+    if foxglove:
+        fg_host = "localhost" if foxglove_host in ("0.0.0.0", "::") else foxglove_host
+        typer.echo(f"Foxglove: 在 Foxglove Studio 连接 ws://{fg_host}:{foxglove_port}")
 
     result = run_replay(config)
     r = result.report

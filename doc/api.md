@@ -27,6 +27,9 @@ replay run \
   [--latency-compensation-ms MS] \
   [--no-video] \
   [--visualize | -v] \
+  [--foxglove] \
+  [--foxglove-host HOST] \
+  [--foxglove-port PORT] \
   [--realtime | --fast]
 ```
 
@@ -41,10 +44,33 @@ replay run \
 | `--output` | `./output` | 输出根目录 |
 | `--latency-compensation-ms` | `0` | 控制信号提前量（毫秒） |
 | `--no-video` | false | 跳过视频导出 |
-| `--visualize`, `-v` | false | 回放时实时显示 3D 场景与相机画面 |
+| `--visualize`, `-v` | false | MuJoCo 3D 视窗 + OpenCV 相机窗口（需 DISPLAY） |
+| `--foxglove` | false | Foxglove WebSocket 实时发布仿真 topic |
+| `--foxglove-host` | `0.0.0.0` | Foxglove WS 监听地址 |
+| `--foxglove-port` | `8765` | Foxglove WS 端口 |
 | `--realtime` / `--fast` | `--realtime` | 可视化时按真实时间播放；`--fast` 全速 |
 
-### 可视化说明
+### 可视化模式
+
+| 模式 | 命令 | 软件 | 说明 |
+|------|------|------|------|
+| 本地窗口 | `-v` | MuJoCo Viewer + OpenCV | 需 `DISPLAY` |
+| Foxglove | `--foxglove` | [Foxglove Studio](https://foxglove.dev/) | 连接 `ws://localhost:8765` |
+
+**Foxglove 发布 topic**
+
+| Topic | 内容 |
+|-------|------|
+| `/sim/d1/joint_states` | 仿真实际关节角（JSON） |
+| `/sim/d1/command` | 控制目标关节角（JSON） |
+| `/sim/camera/scene/image_raw` | 场景相机 JPEG |
+| `/sim/camera/wrist/image_raw` | 腕部相机 JPEG |
+| `/sim/objects/orange` | 橙子位置 |
+| `/sim/objects/bowl` | 碗位置 |
+
+安装：`pip install -e ".[foxglove]"`
+
+### 可视化说明（`-v`）
 
 启用 `-v` 时：
 

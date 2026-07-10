@@ -17,6 +17,9 @@ class ReplayConfig:
     latency_compensation_ms: float = 0.0
     write_video: bool = True
     visualize: bool = False
+    foxglove: bool = False
+    foxglove_host: str = "0.0.0.0"
+    foxglove_port: int = 8765
     realtime: bool = True
     control_hz: float = 30.0
 

@@ -6,7 +6,8 @@
 |------|------|---------|------|
 | `replay` | `sim-replay:mujoco` | 默认 | MuJoCo 物理回放，支持视频导出 |
 | `replay-isaac` | `sim-replay:isaac` | `isaac` | 基于 NGC `isaac-sim:5.1.0` |
-| `replay-viz` | `sim-replay:mujoco` | `viz` | 带 X11 的实时可视化回放 |
+| `replay-viz` | `sim-replay:mujoco` | `viz` | X11 实时可视化（MuJoCo + OpenCV） |
+| `replay-foxglove` | `sim-replay:mujoco` | `foxglove` | Foxglove WebSocket 可视化 |
 
 ## 一键部署
 
@@ -66,7 +67,11 @@ docker compose --env-file docker/.env run --rm replay
 # Isaac Sim 5.1 回放（GPU）
 docker compose --env-file docker/.env --profile isaac run --rm replay-isaac
 
-# 实时可视化（需 X11）
+# Foxglove 可视化（推荐）
+docker compose --env-file docker/.env --profile foxglove run --rm -p 8765:8765 replay-foxglove
+# Foxglove Studio → Open connection → ws://localhost:8765
+
+# X11 实时可视化（需 DISPLAY）
 xhost +local:docker   # 首次授权
 docker compose --env-file docker/.env --profile viz run --rm replay-viz
 

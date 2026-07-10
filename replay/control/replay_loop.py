@@ -17,6 +17,7 @@ from replay.metrics.report import write_compare_video, write_sim_videos
 from replay.metrics.success import check_orange_in_bowl, check_task_success
 from replay.metrics.tracking import TrackingAccumulator
 from replay.viz.display import ReplayDisplay
+from replay.viz.foxglove import FoxglovePublisher
 import warnings
 
 
@@ -44,7 +45,7 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
     t0 = timeline[0][0]
     timeline = [(t - t0, angles) for t, angles in timeline]
 
-    need_render = config.write_video or config.visualize
+    need_render = config.write_video or config.visualize or config.foxglove
     backend = create_backend(
         config.backend,
         enable_render=need_render,
@@ -53,11 +54,24 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
     backend.reset(scene, initial_angles_deg=timeline[0][1])
 
     display: ReplayDisplay | None = None
+    foxglove_pub: FoxglovePublisher | None = None
+
+    if config.foxglove:
+        try:
+            foxglove_pub = FoxglovePublisher(
+                host=config.foxglove_host,
+                port=config.foxglove_port,
+                realtime=config.realtime,
+            )
+            foxglove_pub.start()
+        except RuntimeError as exc:
+            warnings.warn(f"Foxglove 不可用: {exc}")
+
     if config.visualize:
-        display = ReplayDisplay(realtime=config.realtime)
+        display = ReplayDisplay(realtime=config.realtime and foxglove_pub is None)
         display.open(backend)
         if not display.enabled:
-            warnings.warn("可视化不可用（无 DISPLAY），继续无界面回放")
+            warnings.warn("本地可视化不可用（无 DISPLAY），继续无界面回放")
             display.close()
             display = None
 
@@ -84,6 +98,9 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
         if config.write_video and int(t * config.control_hz) % 2 == 0:
             scene_frames.append(backend.render("scene"))
             wrist_frames.append(backend.render("wrist"))
+
+        if foxglove_pub is not None:
+            foxglove_pub.update(backend, t, dt, current_target, obs)
 
         if display is not None and not display.update(backend, t, dt):
             break
@@ -137,6 +154,8 @@ def run_replay(config: ReplayConfig) -> ReplayResult:
 
     if display is not None:
         display.close()
+    if foxglove_pub is not None:
+        foxglove_pub.close()
 
     backend.close()
 

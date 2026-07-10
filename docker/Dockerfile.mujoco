@@ -17,7 +17,7 @@ COPY pyproject.toml README.md /app/
 COPY replay /app/replay
 COPY assets /app/assets
 
-RUN pip install --no-cache-dir -e .
+RUN pip install --no-cache-dir -e ".[foxglove]"
 
 ENV MUJOCO_GL=egl
 ENV PYTHONUNBUFFERED=1
