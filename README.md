@@ -53,6 +53,7 @@ docker compose --env-file docker/.env --profile foxglove run --rm -p 8765:8765 r
 | [API 说明](doc/api.md) | CLI 参数与输出格式 |
 | [Docker 指南](doc/docker.md) | 环境变量、镜像构建、冒烟测试 |
 | [实施清单](doc/回放系统-实施清单.md) | 进度与命令速查 |
+| [巡检仿真证据合同](doc/巡检仿真证据合同.md) | 输入身份、任务分母、故障注入与仿真—现场边界 |
 
 ## 输出示例
 
