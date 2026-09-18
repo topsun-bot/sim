@@ -1,5 +1,8 @@
 # sim-replay
 
+[快速开始](#快速开始) · [文档](#文档) · [输出示例](#输出示例)
+
+
 D1 Leader-Follower MCAP 数据物理闭环回放系统（MuJoCo / Isaac Sim 5.1）。
 
 ## 快速开始
